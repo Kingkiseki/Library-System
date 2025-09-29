@@ -5,7 +5,7 @@ const Faculty = () => {
   return (
     <div className="p-6">
       {/* Title */}
-      <h2 className="text-3xl font-sans mb-2">Staffs</h2>
+      <h2 className="text-3xl font-sans mb-2">Librarian/Staffs</h2>
       <p className="text-gray-600 mb-10">Library Staff</p>
 
       {/* Profiles */}

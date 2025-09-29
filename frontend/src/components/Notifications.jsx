@@ -5,57 +5,43 @@ const Notifications = () => {
 
   const notifications = {
     Today: [
-      { text: "10 Book in total has been returned", time: "1 minute ago" },
-    ],
-    Week: [
-      { text: "5 Students are overdue", time: "3 days ago" },
-      { text: "Fire and Blood Book has been added", time: "1 week ago" },
-    ],
-    Month: [
-      { text: "New Semester has started", time: "2 weeks ago" },
-      { text: "30 Books borrowed", time: "3 weeks ago" },
-    ],
+      { text: "Zaldy COrrupt", time: "1 minute ago" },
+    ]
   };
 
   return (
-    <div className="bg-teal-700 text-white p-4 w-full">
+    <div
+      className="bg-teal-700 text-white p-0 w-full"
+      style={{
+        boxShadow: "8px 8px 20px rgba(0,0,0,0.4)", // 3D shadow on right & bottom
+      }}
+    >
       {/* Title */}
-      <h2 className="text-2xl font-sans mb-2">Notifications</h2>
+      <h2 className="text-2xl font-sans m-3">New Registrant</h2>
 
       {/* Tabs */}
-      <div className="flex space-x-4 border-b border-white/50 mb-3">
-        {["Today", "Week", "Month"].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`pb-1 text-sm ${
-              activeTab === tab
-                ? "border-b-2 border-amber-600 font-semibold"
-                : "text-gray-300 hover:text-white"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
+      
+      <div className="flex space-x-4 border-b p-2 border-white mb-3">
+    
+      </div> 
 
       {/* Notifications List */}
       <div className="space-y-3">
         {notifications[activeTab].map((note, index) => (
           <div
             key={index}
-            className="flex justify-between items-center border-b border-white/40 pb-2"
+            className="flex justify-between items-center border-b border-white pb-2 m-3"
           >
             <p
               className={`text-sm ${
-                note.text.includes("overdue")
-                  ? "text-red-300 font-medium"
+                note.text.includes("")
+                  ? "text-white font-medium"
                   : "font-medium"
               }`}
             >
               {note.text}
             </p>
-            <span className="bg-white text-gray-700 text-xs px-3 py-1 rounded-full shadow">
+            <span className="bg-white text-gray-700 text-xs px-3 py-1 rounded-full shadow-md">
               {note.time}
             </span>
           </div>

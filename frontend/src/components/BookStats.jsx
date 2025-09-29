@@ -1,6 +1,10 @@
+// frontend/src/components/BookStats.jsx
 import React, { useEffect, useState } from "react";
 import api from "../api";
-import dashboardBookIcon from "../assets/dashboardbookicon.png";
+import dashboardBookIcon1 from "../assets/dashboardbookicon1.png";
+import dashboardBookIcon2 from "../assets/dashboardbookicon2.png";
+import dashboardBookIcon3 from "../assets/dashboardbookicon3.png";
+import dashboardBookIcon4 from "../assets/dashboardbookicon.png"; // for Returned
 
 const BookStats = () => {
   const [stats, setStats] = useState({
@@ -30,28 +34,49 @@ const BookStats = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Data with icons
   const statsData = [
-    { title: "Total Books", value: stats.Added },
-    { title: "Available Books", value: stats.Available },
-    { title: "Borrowed Books", value: stats.Borrowed },
-    { title: "Returned Books", value: stats.Returned },
+    {
+      title: "Added Books",
+      value: `${stats.Added ?? 0} New Books`,
+      icon: dashboardBookIcon1,
+    },
+    {
+      title: "Available Books",
+      value: `${stats.Available ?? 0} Available`,
+      icon: dashboardBookIcon2,
+    },
+    {
+      title: "Borrowed Books",
+      value: `${stats.Borrowed ?? 0} Borrowed`,
+      icon: dashboardBookIcon3,
+    },
+    {
+      title: "Returned Books",
+      value: `${stats.Returned ?? 0} Returned`,
+      icon: dashboardBookIcon4,
+    },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {statsData.map((stat, idx) => (
         <div
           key={idx}
-          className="relative h-45 flex items-center pl-5"
+          className="relative h-40 flex items-center justify-center rounded-xl overflow-hidden group"
           style={{
-            backgroundImage: `url(${dashboardBookIcon})`,
+            backgroundImage: `url(${stat.icon})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
         >
-          <div className="relative z-10 flex flex-col justify-between h-full p-4 text-white">
+          {/* Dark overlay for readability */}
+          <div className="absolute inset-0 group-hover:bg-opacity-60 transition-all"></div>
+
+          {/* Content */}
+          <div className="relative z-10 flex flex-col items-center justify-center text-center text-white px-4">
             <h2 className="text-lg font-semibold">{stat.title}</h2>
-            <p className="text-sm">{stat.value ?? 0}</p>
+            <p className="text-sm mt-1">{stat.value}</p>
           </div>
         </div>
       ))}

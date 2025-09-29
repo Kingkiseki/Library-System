@@ -1,5 +1,6 @@
+// frontend/src/components/Dashboard.jsx
 import React, { useEffect, useState } from "react";
-import QRPopup from "./QRPopup"; // import the popup
+import QRPopup from "./QRPopup";
 import BookStats from "./BookStats";
 import Notifications from "./Notifications";
 import TotalBooksReport from "./TotalBooksReport";
@@ -8,13 +9,15 @@ import FineQueue from "./FineQueue";
 
 export default function Dashboard() {
   const [email, setEmail] = useState("");
-  const [qrData, setQrData] = useState(null); // scanner data
+  const [qrData, setQrData] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {
     fetchUser();
   }, []);
 
+  // ✅ Fetch logged-in user
   const fetchUser = async () => {
     try {
       const res = await fetch("http://localhost:5000/api/auth/me", {
@@ -25,6 +28,17 @@ export default function Dashboard() {
       if (!res.ok) throw new Error("Unauthorized");
       const data = await res.json();
       setEmail(data.email);
+
+      // ✅ Show welcome message only once per login/session
+      const hasShownWelcome = sessionStorage.getItem("hasShownWelcome");
+      if (!hasShownWelcome) {
+        setShowWelcome(true);
+        const timer = setTimeout(() => {
+          setShowWelcome(false);
+          sessionStorage.setItem("hasShownWelcome", "true");
+        }, 3000);
+        return () => clearTimeout(timer);
+      }
     } catch (err) {
       console.error(err);
       window.location.href = "/login";
@@ -38,11 +52,25 @@ export default function Dashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    sessionStorage.removeItem("hasShownWelcome"); // reset welcome on next login
     window.location.href = "/login";
   };
 
   return (
-    <div className="p-4 sm:p-6 min-h-screen bg-gray-100">
+    <div className="relative p-4 sm:p-6 min-h-screen bg-gray-100">
+      {/* ✅ Welcome Overlay (only shows once per login) */}
+      {showWelcome && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <h2 className="text-2xl font-bold text-teal-600">
+              Welcome {email ? email : "User"} 🎉
+            </h2>
+            <p className="text-gray-600 mt-2">Glad to see you back!</p>
+          </div>
+        </div>
+      )}
+
+      {/* Page Header */}
       <header className="mb-6">
         <h1 className="text-2xl sm:text-3xl font-sans text-gray-800">
           Dashboard
@@ -53,7 +81,7 @@ export default function Dashboard() {
         )}
         <button
           onClick={handleLogout}
-          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+          className="mt-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
         >
           Logout
         </button>
@@ -89,6 +117,7 @@ export default function Dashboard() {
         />
       </div>
 
+      {/* QR Popup */}
       {showPopup && (
         <QRPopup qrData={qrData} onClose={() => setShowPopup(false)} />
       )}
