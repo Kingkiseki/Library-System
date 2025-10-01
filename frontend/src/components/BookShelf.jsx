@@ -44,35 +44,38 @@ const BookShelf = () => {
   };
 
   // ✅ Add book to database
-  const handleAddBook = async () => {
-    if (!newBook.name || !newBook.author) {
-      alert("Please fill out the required fields (Book Name & Author).");
-      return;
-    }
+ const handleAddBook = async () => {
+  // Check all required fields
+  if (!newBook.name || !newBook.author || !newBook.isbn || !newBook.genre) {
+    alert("Please fill out all required fields (Book Name, Author, ISBN, Genre).");
+    return;
+  }
 
-    const bookToAdd = {
-      ...newBook,
-      status: parseInt(newBook.copies, 10) === 0 ? "Not Available" : "Available",
-    };
-
-    try {
-      await api.post("/books", bookToAdd); // save to backend
-      fetchBooks(); // refresh list
-      setIsModalOpen(false);
-      setNewBook({
-        name: "",
-        isbn: "",
-        genre: "",
-        author: "",
-        color: "",
-        copies: "",
-        status: "Available",
-      });
-    } catch (err) {
-      console.error("Error adding book:", err);
-      alert("Failed to add book.");
-    }
+  const bookToAdd = {
+    ...newBook,
+    copies: parseInt(newBook.copies, 10) || 1, // default to 1
+    status: parseInt(newBook.copies, 10) === 0 ? "Borrowed" : "Available", // ✅ enum safe
   };
+
+  try {
+    await api.post("/api/books", bookToAdd); // adjust path if needed
+    fetchBooks();
+    setIsModalOpen(false);
+    setNewBook({
+      name: "",
+      isbn: "",
+      genre: "",
+      author: "",
+      color: "",
+      copies: "",
+      status: "Available",
+    });
+  } catch (err) {
+    console.error("Error adding book:", err.response?.data || err.message);
+    alert("Failed to add book.");
+  }
+};
+
 
   // ✅ Delete books from database
   const handleDeleteSelected = async () => {
