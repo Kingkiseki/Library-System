@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./components/Dashboard";
@@ -18,31 +18,17 @@ function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [scannedData, setScannedData] = useState(null);
 
-  // NEW: control logo intro + welcome
+  // NEW: intro screens
   const [showLogoOnly, setShowLogoOnly] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
 
+  // Splash Screen delay (only on first open)
   useEffect(() => {
-    if (token) {
-      setShowLogoOnly(true);
-
-      // Step 1: show logo only
-      const logoTimer = setTimeout(() => {
-        setShowLogoOnly(false);
-        setShowWelcome(true);
-      }, 1000); // 1s logo only
-
-      // Step 2: remove welcome after delay
-      const welcomeTimer = setTimeout(() => {
-        setShowWelcome(false);
-      }, 2800); // ~2.8s total then go to dashboard
-
-      return () => {
-        clearTimeout(logoTimer);
-        clearTimeout(welcomeTimer);
-      };
-    }
-  }, [token]);
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   // QR Scanner listener
   useEffect(() => {
@@ -55,7 +41,7 @@ function App() {
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, []);
 
-  // Splash Screen
+  // Step 1: Splash Screen
   if (showSplash) {
     return (
       <div className="flex items-center justify-center h-screen w-screen bg-white">
@@ -63,13 +49,12 @@ function App() {
           src={logo2}
           alt="Logo"
           className="w-40 h-40 cursor-pointer hover:scale-105 transition duration-300"
-          onClick={() => setShowSplash(false)}
         />
       </div>
     );
   }
 
-  // Step 1: Logo only
+  // Step 2: Logo Only
   if (showLogoOnly) {
     return (
       <div className="flex items-center justify-center h-screen w-screen bg-white">
@@ -85,7 +70,7 @@ function App() {
     );
   }
 
-  // Step 2: Welcome animation
+  // Step 3: Welcome Animation
   if (showWelcome) {
     return (
       <div className="flex items-center justify-center h-screen w-screen bg-white">
@@ -126,7 +111,28 @@ function App() {
     <Router>
       <Routes>
         {/* Public Routes */}
-        <Route path="/login" element={<Login setToken={setToken} />} />
+        <Route
+          path="/login"
+          element={
+            <Login
+              setToken={(tokenValue) => {
+                localStorage.setItem("token", tokenValue);
+                setToken(tokenValue);
+
+                // Trigger logo + welcome animation on login
+                setShowLogoOnly(true);
+                setTimeout(() => {
+                  setShowLogoOnly(false);
+                  setShowWelcome(true);
+                }, 1000); // logo for 1s
+
+                setTimeout(() => {
+                  setShowWelcome(false);
+                }, 2800); // end welcome after 2.8s
+              }}
+            />
+          }
+        />
         <Route path="/signup" element={<SignUp />} />
 
         {/* Protected Routes */}
