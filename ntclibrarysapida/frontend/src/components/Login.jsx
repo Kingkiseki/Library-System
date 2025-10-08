@@ -59,20 +59,27 @@ const LoginPage = ({ setToken }) => {
 
       {/* Logo in top-right */}
       <div className="absolute top-4 right-6 z-20">
-        <img src={logo} alt="Logo" className="w-35" />
+        <img src={logo} alt="Logo" className="w-25" />
       </div>
 
       {/* Left Section (Tagline) */}
-      <div className="relative z-10 w-1/1 flex flex-col justify-center items-center text-white p-10">
-        <h1 className="text-xl font-sans mb-2 text-center">
-          NORTHLINK TECHNOLOGICAL COLLEGE
-        </h1>
-        <h2 className="text-8xl font-sans mb-4 text-center">LIBRARY SYSTEM</h2>
-        <p className="text-lg text-center max-w-md">
-          Scan with ease, read with purpose—<br /> bridging digital and
-          physical.
+      <div className="relative z-10 w-full flex flex-col justify-center items-center text-white p-10">
+        {/* Title Group */}
+        <div className="flex flex-col items-start text-left">
+          <h1 className="text-xl font-sans mb-1 tracking-wide ml-2">
+            NORTHLINK TECHNOLOGICAL COLLEGE
+          </h1>
+          <h2 className="text-8xl font-bold mb-4">LIBRARY SYSTEM</h2>
+        </div>
+
+        {/* Centered tagline */}
+        <p className="text-lg text-justify max-w-md mt-2">
+          Scan with ease, read <br />  with purpose— bridging digital <br />  and physical.
         </p>
       </div>
+
+
+
 
       {/* Right Section (Login Form) */}
       <div className="relative z-10 w-1/2 flex items-center justify-center bg-white">

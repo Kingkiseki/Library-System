@@ -43,6 +43,17 @@ const BookShelf = () => {
     }
   };
 
+  const handleDownloadQR = () => {
+    const canvas = qrRef.current.querySelector("canvas");
+    const pngUrl = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+    const downloadLink = document.createElement("a");
+    downloadLink.href = pngUrl;
+    downloadLink.download = `${newBook.name || "book_qr"}.png`;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+  };
+
   useEffect(() => {
     fetchBooks();
   }, []);
@@ -227,7 +238,10 @@ const BookShelf = () => {
     alert("Failed to add book.");
   }
 };
-
+  // ✅ Check if form is complete
+  const isFormComplete = () => {
+    return Object.values(newBook).every((val) => val.trim() !== "");
+  };
 
   // ✅ Delete books from database
   const handleDeleteSelected = async () => {
@@ -494,25 +508,39 @@ const BookShelf = () => {
 
               {/* Right Side - QR Code */}
               <div className="flex flex-col items-center justify-center text-black">
-                {Object.values(newBook).some((val) => val !== "") ? (
-                  <>
-                    <div ref={qrRef}>
-                      <QRCodeCanvas
-                        value={`Book: ${newBook.name}, ISBN: ${newBook.isbn}, Genre: ${newBook.genre}, Author: ${newBook.author}, Color: ${newBook.color}`}
-                        size={180}
-                        bgColor="#ffffff"
-                        fgColor="#000000"
-                        level="H"
-                        includeMargin={true}
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <p className="text-gray-500 text-sm">
-                    Fill in details to generate QR
-                  </p>
-                )}
-              </div>
+                  {Object.values(newBook).some((val) => val !== "") ? (
+                    <>
+                      <div className="bg-white p-4 rounded-lg" ref={qrRef}>
+                        <QRCodeCanvas
+                          value={`Book: ${newBook.name}, ISBN: ${newBook.isbn}, Genre: ${newBook.genre}, Author: ${newBook.author}, Color: ${newBook.color}`}
+                          size={180}
+                          bgColor="#ffffff"
+                          fgColor="#000000"
+                          level="H"
+                          includeMargin={true}
+                        />
+                        <p className="text-center text-black mt-2 text-sm">
+                          Download/Print
+                        </p>
+                        <button
+                          onClick={handleDownloadQR}
+                          disabled={!isFormComplete()}
+                          className={`ml-7 mt-2 px-3 py-1 rounded text-white ${
+                            isFormComplete()
+                              ? "bg-teal-600 hover:bg-teal-500"
+                              : "bg-gray-400 cursor-not-allowed"
+                          }`}
+                        >
+                          Download QR
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-gray-500 text-sm">
+                      Fill in details to generate QR
+                    </p>
+                  )}
+                </div>
             </div>
 
             {/* Footer Buttons */}
@@ -567,6 +595,7 @@ const BookShelf = () => {
               </div>
 
               {/* Right Side - QR Code */}
+              {/*
               <div className="flex flex-col items-center justify-center text-black">
                 {Object.values(newBook).some((val) => val !== "") ? (
                   <>
@@ -592,7 +621,7 @@ const BookShelf = () => {
                     Fill in details to generate QR
                   </p>
                 )}
-              </div>
+              </div> */}
             </div>
 
             {/* Footer Buttons */}
@@ -628,7 +657,7 @@ const BookShelf = () => {
 
       {/* QR Code Modal */}
       {isQRModalOpen && selectedBook && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40 backdrop-blur-sm">
           <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md mx-4">
             <h2 className="text-lg font-bold mb-4 text-center text-gray-800">
               QR Code for "{selectedBook.name}"

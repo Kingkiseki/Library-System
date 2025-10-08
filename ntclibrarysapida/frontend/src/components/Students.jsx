@@ -26,7 +26,6 @@ const Students = () => {
   // QR Scanner states
   const [qrData, setQrData] = useState(null);
   const [showQRPopup, setShowQRPopup] = useState(false);
-
   const [studentForm, setStudentForm] = useState({
     fullName: "",
     year: "",
@@ -606,7 +605,7 @@ const Students = () => {
 
       {/* Contacts Modal */}
       {isContactModalOpen && selectedContacts && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-opacity-30 z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-80">
             <h3 className="text-lg font-bold mb-4">Contacts</h3>
             <p>Mobile: {selectedContacts.mobile}</p>
@@ -626,7 +625,7 @@ const Students = () => {
 
       {/* QR Code Modal */}
       {isQRModalOpen && selectedStudent && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40 backdrop-blur-sm">
           <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md mx-4">
             <h2 className="text-lg font-bold mb-4 text-center text-gray-800">
               QR Code for "{selectedStudent.fullName}"

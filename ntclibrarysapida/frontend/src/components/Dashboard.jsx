@@ -151,7 +151,7 @@ export default function Dashboard() {
     <div className="relative p-4 sm:p-6 min-h-screen bg-gray-100">
       {/* ✅ Welcome Overlay (only shows once per login) */}
       {showWelcome && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div className="absolute inset-0 flex items-center justify-center bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">
             <h2 className="text-2xl font-bold text-teal-600">
               Welcome {email ? email : "User"} 🎉
