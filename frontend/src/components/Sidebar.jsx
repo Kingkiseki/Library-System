@@ -4,7 +4,7 @@ import dashboardIcon from "../assets/dashboards.png";
 import graduationIcon from "../assets/graduation.png";
 import groupIcon from "../assets/group.png";
 import libraryIcon from "../assets/library.png";
-import checklists from "../assets/checklists.png"
+import checklists from "../assets/inventory2.png"
 import logo from "../assets/logo1.png"; // using logo1 from 2nd code
 
 const Sidebar = ({ activePage, setActivePage }) => {
@@ -14,8 +14,8 @@ const Sidebar = ({ activePage, setActivePage }) => {
     { id: "dashboard", icon: dashboardIcon, label: "Dashboard", path: "/dashboard" },
     { id: "bookshelf", icon: libraryIcon, label: "Bookshelf", path: "/bookshelf" },
     { id: "students", icon: graduationIcon, label: "Students", path: "/students" },
-    { id: "faculty", icon: groupIcon, label: "Faculty", path: "/faculty" }, 
-    { id: "library", icon: checklists, label: "Library", path: "/library" },
+    { id: "faculty", icon: groupIcon, label: "Faculty", path: "/faculty" },
+    { id: "library", icon: checklists, label: "Inventory", path: "/library" },
   ];
 
   return (
@@ -30,10 +30,9 @@ const Sidebar = ({ activePage, setActivePage }) => {
               navigate(item.path);
             }}
             className={`flex flex-col items-center justify-center sm:w-full sm:p-5 transition
-              ${
-                activePage === item.id
-                  ? "bg-teal-600 sm:border-l-4 sm:border-orange-500 text-white"
-                  : "hover:bg-teal-700"
+              ${activePage === item.id
+                ? "bg-teal-600 sm:border-l-4 sm:border-orange-500 text-white"
+                : "hover:bg-teal-700"
               }`}
           >
             <img

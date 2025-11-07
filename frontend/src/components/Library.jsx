@@ -119,16 +119,16 @@ const Library = () => {
   const filteredData = data
     .filter(item => {
       if (!search) return true;
-      return currentConfig.fields.some(field => 
+      return currentConfig.fields.some(field =>
         String(item[field.key] || "").toLowerCase().includes(search.toLowerCase())
       );
     })
     .sort((a, b) => {
       if (!sortConfig.key) return 0;
-      
+
       const aVal = a[sortConfig.key] || "";
       const bVal = b[sortConfig.key] || "";
-      
+
       if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
       if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
       return 0;
@@ -147,7 +147,7 @@ const Library = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Library Collection Viewer</h1>
+          <h1 className="text-3xl font-sans text-gray-800 mb-2">Library Collection Viewer</h1>
           <p className="text-gray-600">Browse all library inventory collections</p>
         </div>
 
@@ -157,12 +157,12 @@ const Library = () => {
             const Icon = config.icon;
             const count = stats[key] || 0;
             return (
-              <div key={key} className="bg-white p-4 rounded-lg shadow">
+              <div key={key} className="bg-teal-600 p-4 rounded-lg shadow">
                 <div className="flex items-center">
-                  <Icon className="text-2xl text-blue-600 mr-3" />
+                  <Icon className="text-2xl text-white mr-3" />
                   <div>
-                    <p className="text-sm text-gray-600">{config.label}</p>
-                    <p className="text-xl font-bold">{count}</p>
+                    <p className="text-sm text-white text-sans">{config.label}</p>
+                    <p className="text-xl font-sans text-white">{count}</p>
                   </div>
                 </div>
               </div>
@@ -180,11 +180,10 @@ const Library = () => {
                   <button
                     key={key}
                     onClick={() => setActiveTab(key)}
-                    className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${
-                      activeTab === key
-                        ? 'border-blue-500 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
+                    className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${activeTab === key
+                      ? 'border-teal-500 text-teal-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
                   >
                     <Icon className="w-5 h-5" />
                     <span>{config.label}</span>

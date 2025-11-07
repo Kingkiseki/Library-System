@@ -12,7 +12,7 @@ const BookShelf = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
-  
+
 
 
   const [newBook, setNewBook] = useState({
@@ -113,7 +113,7 @@ const BookShelf = () => {
     try {
       const endpoint = categoryConfig[category]?.apiEndpoint;
       if (!endpoint) return;
-      
+
       const res = await api.get(endpoint);
       setInventoryData(prev => ({
         ...prev,
@@ -157,24 +157,24 @@ const BookShelf = () => {
           const trimmedBuffer = buffer.trim();
           console.log("QR Scanner - Raw input:", trimmedBuffer);
           console.log("QR Scanner - Length:", trimmedBuffer.length);
-          
+
           // Clean up the corrupted QR data
           let cleanedData = trimmedBuffer;
-          
+
           // Remove scanner artifacts like @@*@@*@@*
           cleanedData = cleanedData.replace(/@@\*@@\*@@\*/g, '');
           cleanedData = cleanedData.replace(/@@\*/g, '');
           cleanedData = cleanedData.replace(/\*@@/g, '');
           cleanedData = cleanedData.replace(/@/g, '');
-          
+
           console.log("QR Scanner - Cleaned input:", cleanedData);
-          
+
           // Check if it looks like JSON after cleaning
           if (cleanedData.startsWith('{') && cleanedData.endsWith('}')) {
             console.log("QR Scanner - JSON format detected after cleaning");
             setQrData(cleanedData);
             setShowQRPopup(true);
-          } 
+          }
           // Handle student number format (like b6d349212B72767949450*2025-000010)
           else if (cleanedData.includes('2025-') || cleanedData.includes('2024-')) {
             console.log("QR Scanner - Student number format detected:", cleanedData);
@@ -198,7 +198,7 @@ const BookShelf = () => {
             console.log("QR Scanner - Pure JSON format detected");
             setQrData(trimmedBuffer);
             setShowQRPopup(true);
-          } 
+          }
           // Handle any other legacy formats
           else {
             console.log("QR Scanner - Trying as legacy format:", cleanedData);
@@ -211,7 +211,7 @@ const BookShelf = () => {
         }
       } else if (e.key.length === 1) { // Only capture printable characters
         buffer += e.key;
-        
+
         // Auto-clear buffer after 100ms of no input (scanner inputs are very fast)
         scannerTimeout = setTimeout(() => {
           buffer = "";
@@ -248,7 +248,7 @@ const BookShelf = () => {
 
   const handleUpdateBook = async () => {
     const currentConfig = getCurrentConfig();
-    
+
     // Validate required fields based on category
     if (activeCategory === "traditional") {
       if (!newBook.name || !newBook.author || !newBook.isbn || !newBook.genre) {
@@ -262,7 +262,7 @@ const BookShelf = () => {
 
     try {
       await api.put(endpoint, itemToUpdate);
-      
+
       // Refresh data
       fetchInventoryData(activeCategory);
       setIsEditModalOpen(false);
@@ -288,9 +288,9 @@ const BookShelf = () => {
     setQrData({
       type: "inventory",
       inventoryItemId: item._id,
-      inventoryType: activeCategory === "masterlist" ? "MasterList" : 
-                     activeCategory === "librarycollection" ? "LibraryCollection" :
-                     activeCategory === "bookholdings" ? "ListofBookHoldings" : "Ebooks",
+      inventoryType: activeCategory === "masterlist" ? "MasterList" :
+        activeCategory === "librarycollection" ? "LibraryCollection" :
+          activeCategory === "bookholdings" ? "ListofBookHoldings" : "Ebooks",
       title: item.booktitle || item["Book Title"] || item.name || "Unknown Item",
       author: item.author || item.Author || "Unknown Author",
       category: activeCategory
@@ -313,10 +313,10 @@ const BookShelf = () => {
   const handlePrintBookQR = () => {
     const canvas = bookQRRef.current?.querySelector("canvas");
     if (!canvas) return alert("QR not found!");
-    
+
     const printWindow = window.open('', '_blank');
     const url = canvas.toDataURL("image/png");
-    
+
     printWindow.document.write(`
       <html>
         <head>
@@ -364,7 +364,7 @@ const BookShelf = () => {
         </body>
       </html>
     `);
-    
+
     printWindow.document.close();
     printWindow.focus();
     setTimeout(() => {
@@ -396,10 +396,10 @@ const BookShelf = () => {
     }
     const canvas = qrRef.current?.querySelector("canvas");
     if (!canvas) return alert("QR not found!");
-    
+
     const printWindow = window.open('', '_blank');
     const url = canvas.toDataURL("image/png");
-    
+
     printWindow.document.write(`
       <html>
         <head>
@@ -448,7 +448,7 @@ const BookShelf = () => {
         </body>
       </html>
     `);
-    
+
     printWindow.document.close();
     printWindow.focus();
     setTimeout(() => {
@@ -480,10 +480,10 @@ const BookShelf = () => {
     }
     const canvas = editQRRef.current?.querySelector("canvas");
     if (!canvas) return alert("QR not found!");
-    
+
     const printWindow = window.open('', '_blank');
     const url = canvas.toDataURL("image/png");
-    
+
     printWindow.document.write(`
       <html>
         <head>
@@ -532,7 +532,7 @@ const BookShelf = () => {
         </body>
       </html>
     `);
-    
+
     printWindow.document.close();
     printWindow.focus();
     setTimeout(() => {
@@ -542,17 +542,17 @@ const BookShelf = () => {
   };
 
   // ✅ Add book/inventory item to database
- const handleAddBook = async () => {
-  const currentConfig = getCurrentConfig();
-  
-  // For traditional books (now using book-holdings), map the fields
-  // Add inventory item using direct field mapping
-  let itemToAdd = { ...newBook };
-  
-  try {
-    await api.post(currentConfig.apiEndpoint, itemToAdd);
-    fetchInventoryData(activeCategory);
-      
+  const handleAddBook = async () => {
+    const currentConfig = getCurrentConfig();
+
+    // For traditional books (now using book-holdings), map the fields
+    // Add inventory item using direct field mapping
+    let itemToAdd = { ...newBook };
+
+    try {
+      await api.post(currentConfig.apiEndpoint, itemToAdd);
+      fetchInventoryData(activeCategory);
+
       setIsModalOpen(false);
       setNewBook({
         name: "",
@@ -575,27 +575,27 @@ const BookShelf = () => {
       alert("No items selected.");
       return;
     }
-    
+
     const currentConfig = getCurrentConfig();
-    
+
     const confirmDelete = window.confirm(
       `Are you sure you want to delete ${selectedBooks.length} item(s)?`
     );
-    
+
     if (confirmDelete) {
       try {
         const dataSource = getCurrentData();
-        
+
         for (const idx of selectedBooks) {
           const item = dataSource[idx];
           if (item && item._id) {
             await api.delete(`${currentConfig.apiEndpoint}/${item._id}`);
           }
         }
-        
+
         // Refresh data
         fetchInventoryData(activeCategory);
-        
+
         setSelectedBooks([]);
         setDeleteMode(false);
       } catch (err) {
@@ -635,7 +635,7 @@ const BookShelf = () => {
   const filteredBooks = getCurrentData().filter((item) => {
     const query = search.toLowerCase();
     const config = getCurrentConfig();
-    
+
     return config.fields.some(field => {
       const value = item[field.key];
       return value && value.toString().toLowerCase().includes(query);
@@ -661,11 +661,10 @@ const BookShelf = () => {
               <button
                 key={key}
                 onClick={() => setActiveCategory(key)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-                  activeCategory === key
-                    ? "bg-teal-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${activeCategory === key
+                  ? "bg-teal-600 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
               >
                 <IconComponent className="text-sm" />
                 <span className="text-sm font-medium">{config.label}</span>
@@ -693,11 +692,10 @@ const BookShelf = () => {
               setDeleteMode(true);
             }
           }}
-          className={`p-2 rounded-full bg-white border-2 ${
-            deleteMode
-              ? "text-red-600 border-red-600 hover:bg-red-500"
-              : "text-teal-600 border-teal-600 hover:bg-red-500"
-          }`}
+          className={`p-2 rounded-full bg-white border-2 ${deleteMode
+            ? "text-red-600 border-red-600 hover:bg-red-500"
+            : "text-teal-600 border-teal-600 hover:bg-red-500"
+            }`}
           title={deleteMode ? "Confirm Delete" : `Delete ${getCurrentConfig().label}`}
         >
           <FiX />
@@ -705,11 +703,10 @@ const BookShelf = () => {
 
         <button
           onClick={() => setEditMode(!editMode)}
-          className={`p-2 rounded-full bg-white border-2 ${
-            editMode
-              ? "text-yellow-600 border-yellow-600 hover:bg-yellow-400"
-              : "text-teal-600 border-teal-600 hover:bg-yellow-400"
-          }`}
+          className={`p-2 rounded-full bg-white border-2 ${editMode
+            ? "text-yellow-600 border-yellow-600 hover:bg-yellow-400"
+            : "text-teal-600 border-teal-600 hover:bg-yellow-400"
+            }`}
           title={editMode ? "Exit Edit Mode" : `Edit ${getCurrentConfig().label}`}
         >
           <FiEdit />
@@ -804,10 +801,10 @@ const BookShelf = () => {
                     {getCurrentConfig().fields.map((field) => (
                       <td key={field.key} className="px-2 sm:px-4 py-2 border">
                         {field.type === "url" ? (
-                          <a 
-                            href={item[field.key]} 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
+                          <a
+                            href={item[field.key]}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="text-blue-600 hover:underline"
                           >
                             {item[field.key] ? "Access Link" : "N/A"}
@@ -847,13 +844,21 @@ const BookShelf = () => {
 
       {/* Add Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="bg-teal-700 rounded-lg shadow-lg p-6 w-full max-w-3xl mx-4 text-white">
-            <h2 className="text-lg font-bold mb-6">Adding new {getCurrentConfig().label.toLowerCase()}</h2>
+        <div className="fixed inset-0 flex items-center justify-center z-50  bg-opacity-50">
+          <div
+            className="bg-teal-700 rounded-lg shadow-lg p-6 w-full max-w-4xl mx-4 text-white 
+      max-h-[90vh] overflow-y-auto"
+          >
+            <h2 className="text-lg font-bold mb-6">
+              Adding new {getCurrentConfig().label.toLowerCase()}
+            </h2>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Left Side - Inputs */}
               <div>
-                <h3 className="font-semibold mb-4 text-center">{getCurrentConfig().label.toUpperCase()} INFORMATION</h3>
+                <h3 className="font-semibold mb-4 text-center">
+                  {getCurrentConfig().label.toUpperCase()} INFORMATION
+                </h3>
                 <div className="space-y-4">
                   {getCurrentConfig().fields.map((field) => (
                     <div key={field.key} className="flex items-center">
@@ -861,10 +866,10 @@ const BookShelf = () => {
                       <input
                         type={field.type}
                         name={field.key}
-                        value={newBook[field.key] || ''}
+                        value={newBook[field.key] || ""}
                         onChange={handleChange}
                         required={field.required}
-                        className="flex-1 ml-2 px-3 py-2 text-black bg-white border-2"
+                        className="flex-1 ml-2 px-3 py-2 text-black bg-white border-2 rounded"
                       />
                     </div>
                   ))}
@@ -879,13 +884,24 @@ const BookShelf = () => {
                       <QRCodeCanvas
                         value={JSON.stringify({
                           type: "inventory",
-                          inventoryItemId: "new-item", // Placeholder for new items
-                          inventoryType: activeCategory === "masterlist" ? "MasterList" : 
-                                       activeCategory === "librarycollection" ? "LibraryCollection" :
-                                       activeCategory === "bookholdings" ? "ListofBookHoldings" : "Ebooks",
-                          title: newBook.name || newBook["Book Title"] || "New Item",
-                          author: newBook.author || newBook.Author || "Unknown Author",
-                          category: activeCategory
+                          inventoryItemId: "new-item",
+                          inventoryType:
+                            activeCategory === "masterlist"
+                              ? "MasterList"
+                              : activeCategory === "librarycollection"
+                                ? "LibraryCollection"
+                                : activeCategory === "bookholdings"
+                                  ? "ListofBookHoldings"
+                                  : "Ebooks",
+                          title:
+                            newBook.name ||
+                            newBook["Book Title"] ||
+                            "New Item",
+                          author:
+                            newBook.author ||
+                            newBook.Author ||
+                            "Unknown Author",
+                          category: activeCategory,
                         })}
                         size={180}
                         bgColor="#ffffff"
@@ -894,33 +910,49 @@ const BookShelf = () => {
                         includeMargin={true}
                       />
                     </div>
+
                     <div className="flex flex-col gap-2 mt-3">
                       <button
                         onClick={handleDownloadNewBookQR}
-                        disabled={!newBook.name || !newBook.author || !newBook.isbn || !newBook.genre}
-                        className={`px-3 py-1 text-xs rounded flex items-center gap-1 ${
-                          newBook.name && newBook.author && newBook.isbn && newBook.genre
-                            ? "bg-blue-600 text-white hover:bg-blue-700"
-                            : "bg-gray-400 text-white cursor-not-allowed"
-                        }`}
+                        disabled={
+                          !newBook.name ||
+                          !newBook.author ||
+                          !newBook.isbn ||
+                          !newBook.genre
+                        }
+                        className={`px-3 py-1 text-xs rounded flex items-center gap-1 ${newBook.name &&
+                          newBook.author &&
+                          newBook.isbn &&
+                          newBook.genre
+                          ? "bg-blue-600 text-white hover:bg-blue-700"
+                          : "bg-gray-400 text-white cursor-not-allowed"
+                          }`}
                       >
                         📥 Download QR
                       </button>
+
                       <button
                         onClick={handlePrintNewBookQR}
-                        disabled={!newBook.name || !newBook.author || !newBook.isbn || !newBook.genre}
-                        className={`px-3 py-1 text-xs rounded flex items-center gap-1 ${
-                          newBook.name && newBook.author && newBook.isbn && newBook.genre
-                            ? "bg-green-600 text-white hover:bg-green-700"
-                            : "bg-gray-400 text-white cursor-not-allowed"
-                        }`}
+                        disabled={
+                          !newBook.name ||
+                          !newBook.author ||
+                          !newBook.isbn ||
+                          !newBook.genre
+                        }
+                        className={`px-3 py-1 text-xs rounded flex items-center gap-1 ${newBook.name &&
+                          newBook.author &&
+                          newBook.isbn &&
+                          newBook.genre
+                          ? "bg-green-600 text-white hover:bg-green-700"
+                          : "bg-gray-400 text-white cursor-not-allowed"
+                          }`}
                       >
                         🖨️ Print QR
                       </button>
                     </div>
                   </>
                 ) : (
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-gray-300 text-sm text-center">
                     Fill in details to generate QR
                   </p>
                 )}
@@ -931,7 +963,7 @@ const BookShelf = () => {
             <div className="flex justify-end mt-6 space-x-2">
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 border rounded bg-white text-black hover:bg-red-500 cursor-pointer"
+                className="px-4 py-2 border rounded bg-white text-black hover:bg-red-500 hover:text-white cursor-pointer"
               >
                 Cancel
               </button>
@@ -945,6 +977,7 @@ const BookShelf = () => {
           </div>
         </div>
       )}
+
 
       {/* Edit Modal */}
       {isEditModalOpen && (
@@ -981,9 +1014,9 @@ const BookShelf = () => {
                         value={JSON.stringify({
                           type: "inventory",
                           inventoryItemId: selectedBook?._id,
-                          inventoryType: activeCategory === "masterlist" ? "MasterList" : 
-                                       activeCategory === "librarycollection" ? "LibraryCollection" :
-                                       activeCategory === "bookholdings" ? "ListofBookHoldings" : "Ebooks",
+                          inventoryType: activeCategory === "masterlist" ? "MasterList" :
+                            activeCategory === "librarycollection" ? "LibraryCollection" :
+                              activeCategory === "bookholdings" ? "ListofBookHoldings" : "Ebooks",
                           title: newBook.name || newBook["Book Title"] || "Unknown Item",
                           author: newBook.author || newBook.Author || "Unknown Author",
                           category: activeCategory
@@ -999,22 +1032,20 @@ const BookShelf = () => {
                       <button
                         onClick={handleDownloadEditBookQR}
                         disabled={!newBook.name || !newBook.author || !newBook.isbn || !newBook.genre}
-                        className={`px-3 py-1 text-xs rounded flex items-center gap-1 ${
-                          newBook.name && newBook.author && newBook.isbn && newBook.genre
-                            ? "bg-blue-600 text-white hover:bg-blue-700"
-                            : "bg-gray-400 text-white cursor-not-allowed"
-                        }`}
+                        className={`px-3 py-1 text-xs rounded flex items-center gap-1 ${newBook.name && newBook.author && newBook.isbn && newBook.genre
+                          ? "bg-blue-600 text-white hover:bg-blue-700"
+                          : "bg-gray-400 text-white cursor-not-allowed"
+                          }`}
                       >
                         📥 Download QR
                       </button>
                       <button
                         onClick={handlePrintEditBookQR}
                         disabled={!newBook.name || !newBook.author || !newBook.isbn || !newBook.genre}
-                        className={`px-3 py-1 text-xs rounded flex items-center gap-1 ${
-                          newBook.name && newBook.author && newBook.isbn && newBook.genre
-                            ? "bg-green-600 text-white hover:bg-green-700"
-                            : "bg-gray-400 text-white cursor-not-allowed"
-                        }`}
+                        className={`px-3 py-1 text-xs rounded flex items-center gap-1 ${newBook.name && newBook.author && newBook.isbn && newBook.genre
+                          ? "bg-green-600 text-white hover:bg-green-700"
+                          : "bg-gray-400 text-white cursor-not-allowed"
+                          }`}
                       >
                         🖨️ Print QR
                       </button>
@@ -1072,9 +1103,9 @@ const BookShelf = () => {
                   value={JSON.stringify({
                     type: "inventory",
                     inventoryItemId: selectedBook._id,
-                    inventoryType: activeCategory === "masterlist" ? "MasterList" : 
-                                 activeCategory === "librarycollection" ? "LibraryCollection" :
-                                 activeCategory === "bookholdings" ? "ListofBookHoldings" : "Ebooks",
+                    inventoryType: activeCategory === "masterlist" ? "MasterList" :
+                      activeCategory === "librarycollection" ? "LibraryCollection" :
+                        activeCategory === "bookholdings" ? "ListofBookHoldings" : "Ebooks",
                     title: selectedBook.booktitle || selectedBook["Book Title"] || selectedBook.name || "Unknown Item",
                     author: selectedBook.author || selectedBook.Author || "Unknown Author",
                     category: activeCategory

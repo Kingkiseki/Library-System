@@ -33,24 +33,24 @@ export default function Dashboard() {
           const trimmedBuffer = buffer.trim();
           console.log("QR Scanner - Raw input:", trimmedBuffer);
           console.log("QR Scanner - Length:", trimmedBuffer.length);
-          
+
           // Clean up the corrupted QR data
           let cleanedData = trimmedBuffer;
-          
+
           // Remove scanner artifacts like @@*@@*@@*
           cleanedData = cleanedData.replace(/@@\*@@\*@@\*/g, '');
           cleanedData = cleanedData.replace(/@@\*/g, '');
           cleanedData = cleanedData.replace(/\*@@/g, '');
           cleanedData = cleanedData.replace(/@/g, '');
-          
+
           console.log("QR Scanner - Cleaned input:", cleanedData);
-          
+
           // Check if it looks like JSON after cleaning
           if (cleanedData.startsWith('{') && cleanedData.endsWith('}')) {
             console.log("QR Scanner - JSON format detected after cleaning");
             setQrData(cleanedData);
             setShowPopup(true);
-          } 
+          }
           // Handle student number format (like b6d349212B72767949450*2025-000010)
           else if (cleanedData.includes('2025-') || cleanedData.includes('2024-')) {
             console.log("QR Scanner - Student number format detected:", cleanedData);
@@ -74,7 +74,7 @@ export default function Dashboard() {
             console.log("QR Scanner - Pure JSON format detected");
             setQrData(trimmedBuffer);
             setShowPopup(true);
-          } 
+          }
           // Handle any other legacy formats
           else {
             console.log("QR Scanner - Trying as legacy format:", cleanedData);
@@ -87,7 +87,7 @@ export default function Dashboard() {
         }
       } else if (e.key.length === 1) { // Only capture printable characters
         buffer += e.key;
-        
+
         // Auto-clear buffer after 100ms of no input (scanner inputs are very fast)
         scannerTimeout = setTimeout(() => {
           buffer = "";
@@ -151,7 +151,7 @@ export default function Dashboard() {
     <div className="relative p-4 sm:p-6 min-h-screen bg-gray-100">
       {/* ✅ Welcome Overlay (only shows once per login) */}
       {showWelcome && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div className="absolute inset-0 flex items-center justify-center bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">
             <h2 className="text-2xl font-bold text-teal-600">
               Welcome {email ? email : "User"} 🎉
