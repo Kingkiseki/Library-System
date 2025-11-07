@@ -8,10 +8,11 @@ import Students from "./components/Students";
 import Faculty from "./components/Faculty";
 import LoginPage from "./components/Login";
 import SignupPage from "./components/SignUp";
-import QRPopup from "./components/QRPopup"; 
-import Library from "./components/Library"
-import logo from "./assets/logo1.png";   // splash
-import logo2 from "./assets/logo2.png";  // main logo
+import QRPopup from "./components/QRPopup";
+import Library from "./components/Library";
+import RegisteredTeachers from "./components/RegisteredTeachers"; // ✅ fixed import path
+import logo from "./assets/logo1.png";
+import logo2 from "./assets/logo2.png";
 
 function App() {
   const [token, setToken] = useState("");
@@ -19,8 +20,6 @@ function App() {
   const [activePage, setActivePage] = useState("dashboard");
   const [showSplash, setShowSplash] = useState(true);
   const [scannedData, setScannedData] = useState(null);
-
-  // NEW: control logo intro + welcome
   const [showLogoOnly, setShowLogoOnly] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
 
@@ -30,24 +29,18 @@ function App() {
       const savedToken = localStorage.getItem("token");
       if (savedToken && savedToken.trim() !== "") {
         try {
-          // Validate token with server
           const response = await fetch("http://localhost:5000/auth/me", {
-            headers: {
-              Authorization: `Bearer ${savedToken}`,
-            },
+            headers: { Authorization: `Bearer ${savedToken}` },
           });
-
           if (response.ok) {
             const userData = await response.json();
             localStorage.setItem("user", JSON.stringify(userData));
             setToken(savedToken);
           } else {
-            // Token is invalid, clear everything
             localStorage.removeItem("token");
             localStorage.removeItem("user");
           }
         } catch (error) {
-          // Network error or server error, clear everything
           console.log("Error validating token, clearing storage...");
           localStorage.removeItem("token");
           localStorage.removeItem("user");
@@ -62,18 +55,13 @@ function App() {
   useEffect(() => {
     if (token) {
       setShowLogoOnly(true);
-
-      // Step 1: show logo only
       const logoTimer = setTimeout(() => {
         setShowLogoOnly(false);
         setShowWelcome(true);
-      }, 1000); // 1s logo only
-
-      // Step 2: remove welcome after delay
+      }, 1000);
       const welcomeTimer = setTimeout(() => {
         setShowWelcome(false);
-      }, 2800); // ~2.8s total then go to dashboard
-
+      }, 2800);
       return () => {
         clearTimeout(logoTimer);
         clearTimeout(welcomeTimer);
@@ -81,33 +69,23 @@ function App() {
     }
   }, [token]);
 
-  // QR Scanner listener - Improved to avoid false triggers
+  // QR Scanner listener
   useEffect(() => {
     let buffer = "";
     let scannerTimeout;
 
     const handleKeyDown = (e) => {
-      // Ignore if user is typing in input fields or text areas
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-        return;
-      }
-
-      // Clear timeout on any key press
-      if (scannerTimeout) {
-        clearTimeout(scannerTimeout);
-      }
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+      if (scannerTimeout) clearTimeout(scannerTimeout);
 
       if (e.key === "Enter") {
-        // Only process if buffer has significant content (QR codes are typically long)
         if (buffer.trim() !== "" && buffer.length > 10) {
           console.log("QR Scanner - Processing scanned data:", buffer.trim());
           setScannedData(buffer.trim());
         }
         buffer = "";
-      } else if (e.key.length === 1) { // Only capture printable characters
+      } else if (e.key.length === 1) {
         buffer += e.key;
-        
-        // Auto-clear buffer after 100ms of no input (scanner inputs are very fast)
         scannerTimeout = setTimeout(() => {
           buffer = "";
         }, 100);
@@ -121,23 +99,18 @@ function App() {
     };
   }, []);
 
-  // Show loading while validating token
   if (isValidating) {
     return (
       <div className="flex items-center justify-center h-screen w-screen bg-white">
         <div className="text-center">
-          <img
-            src={logo2}
-            alt="Logo"
-            className="w-20 h-20 mx-auto mb-4 animate-pulse"
-          />
+          <img src={logo2} alt="Logo" className="w-20 h-20 mx-auto mb-4 animate-pulse" />
           <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     );
   }
 
-  // Splash Screen
+  // Splash screen
   if (showSplash) {
     return (
       <div className="flex items-center justify-center h-screen w-screen bg-white">
@@ -151,7 +124,7 @@ function App() {
     );
   }
 
-  // Step 1: Logo only
+  // Logo only
   if (showLogoOnly) {
     return (
       <div className="flex items-center justify-center h-screen w-screen bg-white">
@@ -167,12 +140,11 @@ function App() {
     );
   }
 
-  // Step 2: Welcome animation
+  // Welcome screen
   if (showWelcome) {
     return (
       <div className="flex items-center justify-center h-screen w-screen bg-white">
         <div className="flex items-center space-x-6">
-          {/* Logo animation (from left) */}
           <motion.img
             src={logo2}
             alt="Logo"
@@ -181,16 +153,12 @@ function App() {
             animate={{ x: -10, opacity: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           />
-
-          {/* Vertical line */}
           <motion.div
             className="h-26 w-1 bg-teal-700"
             initial={{ scaleY: 0 }}
             animate={{ scaleY: 1 }}
             transition={{ duration: 0.6, delay: 0.5, ease: "easeOut" }}
           />
-
-          {/* Welcome text (from right) */}
           <motion.h1
             className="text-4xl font-semibold text-teal-700"
             initial={{ x: 0, opacity: 0 }}
@@ -204,6 +172,22 @@ function App() {
     );
   }
 
+  // Helper component for protected layout
+  const ProtectedLayout = ({ children }) =>
+    token ? (
+      <div className="flex h-screen">
+        <aside className="fixed top-0 left-0 h-full bg-gray-100 text-white">
+          <Sidebar activePage={activePage} setActivePage={setActivePage} />
+        </aside>
+        <main className="flex-1 ml-45 overflow-y-auto bg-gray-100 h-screen">
+          {children}
+        </main>
+        {scannedData && <QRPopup qrData={scannedData} onClose={() => setScannedData(null)} />}
+      </div>
+    ) : (
+      <Navigate to="/login" replace />
+    );
+
   return (
     <Router>
       <Routes>
@@ -211,118 +195,26 @@ function App() {
         <Route path="/login" element={<LoginPage setToken={setToken} />} />
         <Route path="/signup" element={<SignupPage />} />
 
-        {/* Root Route Redirect */}
-        <Route 
-          path="/" 
-          element={token ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} 
+        {/* Root Redirect */}
+        <Route
+          path="/"
+          element={token ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />}
         />
 
         {/* Protected Routes */}
+        <Route path="/dashboard" element={<ProtectedLayout><Dashboard /></ProtectedLayout>} />
+        <Route path="/bookshelf" element={<ProtectedLayout><BookShelf /></ProtectedLayout>} />
+        <Route path="/students" element={<ProtectedLayout><Students /></ProtectedLayout>} />
+        <Route path="/faculty" element={<ProtectedLayout><Faculty /></ProtectedLayout>} />
+        <Route path="/library" element={<ProtectedLayout><Library /></ProtectedLayout>} />
+
+        {/* ✅ NEW: Teacher Registration Route */}
         <Route
-          path="/dashboard"
-          element={
-            token ? (
-              <div className="flex h-screen">
-                <aside className="fixed top-0 left-0 h-full bg-gray-100 text-white">
-                  <Sidebar activePage={activePage} setActivePage={setActivePage} />
-                </aside>
-                <main className="flex-1 ml-45 overflow-y-auto bg-gray-100 h-screen">
-                  <Dashboard />
-                </main>
-                {scannedData && (
-                  <QRPopup qrData={scannedData} onClose={() => setScannedData(null)} />
-                )}
-              </div>
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        
-        <Route
-          path="/bookshelf"
-          element={
-            token ? (
-              <div className="flex h-screen">
-                <aside className="fixed top-0 left-0 h-full bg-gray-100 text-white">
-                  <Sidebar activePage={activePage} setActivePage={setActivePage} />
-                </aside>
-                <main className="flex-1 ml-45 overflow-y-auto bg-gray-100 h-screen">
-                  <BookShelf />
-                </main>
-                {scannedData && (
-                  <QRPopup qrData={scannedData} onClose={() => setScannedData(null)} />
-                )}
-              </div>
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        
-        <Route
-          path="/students"
-          element={
-            token ? (
-              <div className="flex h-screen">
-                <aside className="fixed top-0 left-0 h-full bg-gray-100 text-white">
-                  <Sidebar activePage={activePage} setActivePage={setActivePage} />
-                </aside>
-                <main className="flex-1 ml-45 overflow-y-auto bg-gray-100 h-screen">
-                  <Students />
-                </main>
-                {scannedData && (
-                  <QRPopup qrData={scannedData} onClose={() => setScannedData(null)} />
-                )}
-              </div>
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        
-        <Route
-          path="/faculty"
-          element={
-            token ? (
-              <div className="flex h-screen">
-                <aside className="fixed top-0 left-0 h-full bg-gray-100 text-white">
-                  <Sidebar activePage={activePage} setActivePage={setActivePage} />
-                </aside>
-                <main className="flex-1 ml-45 overflow-y-auto bg-gray-100 h-screen">
-                  <Faculty />
-                </main>
-                {scannedData && (
-                  <QRPopup qrData={scannedData} onClose={() => setScannedData(null)} />
-                )}
-              </div>
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
+          path="/teacher-registration"
+          element={<ProtectedLayout><RegisteredTeachers /></ProtectedLayout>}
         />
 
-      <Route
-          path="/library"
-          element={
-            token ? (
-              <div className="flex h-screen">
-                <aside className="fixed top-0 left-0 h-full bg-gray-100 text-white">
-                  <Sidebar activePage={activePage} setActivePage={setActivePage} />
-                </aside>
-                <main className="flex-1 ml-45 overflow-y-auto bg-gray-100 h-screen">
-                  <Library />
-                </main>
-              </div>
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-
-
-
-        {/* Catch all other routes */}
+        {/* Fallback */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>

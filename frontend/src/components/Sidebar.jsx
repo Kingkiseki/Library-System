@@ -5,6 +5,7 @@ import graduationIcon from "../assets/graduation.png";
 import groupIcon from "../assets/group.png";
 import libraryIcon from "../assets/library.png";
 import checklists from "../assets/inventory2.png"
+import teachereg from "../assets/teachreg.png";
 import logo from "../assets/logo1.png"; // using logo1 from 2nd code
 
 const Sidebar = ({ activePage, setActivePage }) => {
@@ -14,8 +15,9 @@ const Sidebar = ({ activePage, setActivePage }) => {
     { id: "dashboard", icon: dashboardIcon, label: "Dashboard", path: "/dashboard" },
     { id: "bookshelf", icon: libraryIcon, label: "Bookshelf", path: "/bookshelf" },
     { id: "students", icon: graduationIcon, label: "Students", path: "/students" },
-    { id: "faculty", icon: groupIcon, label: "Faculty", path: "/faculty" },
+    { id: "teacher-registration", icon: teachereg, label: "Teacher Reg", path: "/teacher-registration" },
     { id: "library", icon: checklists, label: "Inventory", path: "/library" },
+    { id: "faculty", icon: groupIcon, label: "Faculty", path: "/faculty" },
   ];
 
   return (
