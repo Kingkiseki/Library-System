@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import QRPopup from "./QRPopup"; // import the popup
 import BookStats from "./BookStats";
 import Notifications from "./Notifications";
-import TotalBooksReport from "./TotalBooksReport";
+import TotalBooksReport from "./BorrowedBooksReport";
 import Activity from "./Activity";
 import FineQueue from "./FineQueue";
+import BorrowedBooksReport from "./BorrowedBooksReport";
 
 export default function Dashboard() {
   const [email, setEmail] = useState("");
@@ -170,12 +171,6 @@ export default function Dashboard() {
         {email && (
           <p className="mt-1 text-teal-600 font-medium">Welcome, {email} 👋</p>
         )}
-        <button
-          onClick={handleLogout}
-          className="mt-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-        >
-          Logout
-        </button>
       </header>
 
       {/* Book Stats Row */}
@@ -193,7 +188,7 @@ export default function Dashboard() {
       {/* Main Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Notifications />
-        <TotalBooksReport />
+        <BorrowedBooksReport />
         <Activity />
         <FineQueue />
       </div>

@@ -9,7 +9,7 @@ const FineQueue = () => {
   }, []);
 
   return (
-    <div className="bg-teal-700 text-white shadow-lg w-full h-61 flex flex-col">
+    <div className="bg-teal-700 text-white shadow-lg w-full h-61 flex flex-col rounded-xl">
       <div className="p-4 border-b border-white">
         <h2 className="text-lg font-semibold">Fine Queue</h2>
       </div>

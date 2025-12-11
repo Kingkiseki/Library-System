@@ -1,8 +1,9 @@
 // frontend/src/components/BookShelf.jsx
 import React, { useState, useEffect, useRef } from "react";
-import { FaBook, FaBookOpen, FaList, FaGlobe, FaDatabase } from "react-icons/fa";
+import { FaBook, FaBookOpen, FaList, FaGlobe, FaDatabase, FaDownload } from "react-icons/fa";
 import { FiSearch, FiPlus, FiX, FiEdit } from "react-icons/fi";
 import { QRCodeCanvas } from "qrcode.react";
+import * as XLSX from "xlsx";
 import QRPopup from "./QRPopup";
 import api from "../api"; // ✅ connect to backend
 
@@ -11,7 +12,11 @@ const BookShelf = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
+  const [importedData, setImportedData] = useState([]);
+  const [columnMapping, setColumnMapping] = useState({});
+  const [importFile, setImportFile] = useState(null);
 
 
 
@@ -121,6 +126,122 @@ const BookShelf = () => {
       }));
     } catch (err) {
       console.error(`Error fetching ${category} data:`, err);
+    }
+  };
+
+  // ✅ Handle Excel file import
+  const handleExcelImport = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setImportFile(file);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = event.target.result;
+        const workbook = XLSX.read(data, { type: "array" });
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+        if (jsonData.length === 0) {
+          alert("Excel file is empty!");
+          return;
+        }
+
+        setImportedData(jsonData);
+
+        // Auto-detect column mapping
+        const excelHeaders = Object.keys(jsonData[0]);
+        const currentConfig = categoryConfig[activeCategory];
+        const autoMapping = {};
+
+        // Try to match Excel headers with field keys
+        excelHeaders.forEach(excelHeader => {
+          const lowerExcel = excelHeader.toLowerCase().trim();
+          const matchedField = currentConfig.fields.find(field =>
+            field.key.toLowerCase() === lowerExcel ||
+            field.label.toLowerCase() === lowerExcel
+          );
+          if (matchedField) {
+            autoMapping[excelHeader] = matchedField.key;
+          }
+        });
+
+        setColumnMapping(autoMapping);
+        setIsImportModalOpen(true);
+      } catch (err) {
+        console.error("Error reading Excel file:", err);
+        alert("Error reading Excel file. Please ensure it's a valid .xlsx or .csv file.");
+      }
+    };
+
+    reader.readAsArrayBuffer(file);
+  };
+
+  // ✅ Handle column mapping change
+  const handleMappingChange = (excelColumn, fieldKey) => {
+    setColumnMapping(prev => ({
+      ...prev,
+      [excelColumn]: fieldKey
+    }));
+  };
+
+  // ✅ Submit imported data
+  const handleImportSubmit = async () => {
+    try {
+      const currentConfig = categoryConfig[activeCategory];
+      const itemsToAdd = [];
+
+      // Transform imported data based on column mapping
+      importedData.forEach(row => {
+        const mappedItem = {};
+        Object.entries(columnMapping).forEach(([excelCol, fieldKey]) => {
+          if (fieldKey && row[excelCol] !== undefined) {
+            mappedItem[fieldKey] = row[excelCol];
+          }
+        });
+
+        // Only add if at least one field is mapped
+        if (Object.keys(mappedItem).length > 0) {
+          itemsToAdd.push(mappedItem);
+        }
+      });
+
+      if (itemsToAdd.length === 0) {
+        alert("No valid data to import after mapping.");
+        return;
+      }
+
+      // Send data to backend
+      let successCount = 0;
+      let failureCount = 0;
+
+      for (const item of itemsToAdd) {
+        try {
+          await api.post(currentConfig.apiEndpoint, item);
+          successCount++;
+        } catch (err) {
+          console.error("Error importing item:", err);
+          failureCount++;
+        }
+      }
+
+      alert(`Import complete: ${successCount} items added, ${failureCount} items failed.`);
+
+      // Refresh data and close modal
+      fetchInventoryData(activeCategory);
+      setIsImportModalOpen(false);
+      setImportedData([]);
+      setColumnMapping({});
+      setImportFile(null);
+
+      // Reset file input
+      const fileInput = document.getElementById("excel-import-input");
+      if (fileInput) fileInput.value = "";
+    } catch (err) {
+      console.error("Error submitting import:", err);
+      alert("Error importing data. Please try again.");
     }
   };
 
@@ -685,6 +806,22 @@ const BookShelf = () => {
         </button>
 
         <button
+          onClick={() => document.getElementById("excel-import-input")?.click()}
+          className="p-2 rounded-full bg-white text-teal-600 border-2 border-teal-600 hover:bg-teal-400"
+          title={`Import ${getCurrentConfig().label} from Excel`}
+        >
+          <FaDownload />
+        </button>
+
+        <input
+          id="excel-import-input"
+          type="file"
+          accept=".xlsx,.xls,.csv"
+          onChange={handleExcelImport}
+          style={{ display: "none" }}
+        />
+
+        <button
           onClick={() => {
             if (deleteMode) {
               handleDeleteSelected();
@@ -1147,6 +1284,137 @@ const BookShelf = () => {
                 className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Import Modal */}
+      {isImportModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-4xl mx-4 my-8">
+            <h2 className="text-2xl font-bold mb-6 text-gray-800">
+              Import {getCurrentConfig().label} from Excel
+            </h2>
+
+            {/* Column Mapping Section */}
+            <div className="mb-6 bg-gray-50 p-4 rounded-lg">
+              <h3 className="text-lg font-semibold mb-4 text-gray-700">
+                Map Excel Columns to Fields
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border-collapse">
+                  <thead>
+                    <tr className="bg-teal-600 text-white">
+                      <th className="px-4 py-2 text-left border">Excel Column</th>
+                      <th className="px-4 py-2 text-left border">Map to Field</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {importedData.length > 0 &&
+                      Object.keys(importedData[0]).map((excelCol) => (
+                        <tr key={excelCol} className="border-b hover:bg-gray-100">
+                          <td className="px-4 py-2 border font-medium text-gray-700">
+                            {excelCol}
+                          </td>
+                          <td className="px-4 py-2 border">
+                            <select
+                              value={columnMapping[excelCol] || ""}
+                              onChange={(e) =>
+                                handleMappingChange(excelCol, e.target.value)
+                              }
+                              className="w-full px-3 py-2 border border-gray-400 rounded bg-white text-gray-700"
+                            >
+                              <option value="">-- Select Field --</option>
+                              {getCurrentConfig().fields.map((field) => (
+                                <option key={field.key} value={field.key}>
+                                  {field.label}
+                                </option>
+                              ))}
+                            </select>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Preview Section */}
+            <div className="mb-6 bg-gray-50 p-4 rounded-lg">
+              <h3 className="text-lg font-semibold mb-4 text-gray-700">
+                Preview ({importedData.length} rows)
+              </h3>
+              <div className="overflow-x-auto max-h-60 overflow-y-auto">
+                <table className="w-full text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-gray-300 sticky top-0">
+                      {importedData.length > 0 &&
+                        Object.keys(importedData[0]).map((col) => (
+                          <th
+                            key={col}
+                            className="px-2 py-1 border text-left font-semibold"
+                          >
+                            {col}
+                          </th>
+                        ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {importedData.slice(0, 10).map((row, idx) => (
+                      <tr key={idx} className="border-b hover:bg-gray-100">
+                        {Object.keys(row).map((col) => (
+                          <td
+                            key={col}
+                            className="px-2 py-1 border text-gray-700"
+                          >
+                            {row[col]?.toString() || "N/A"}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {importedData.length > 10 && (
+                <p className="text-xs text-gray-500 mt-2">
+                  Showing 10 of {importedData.length} rows
+                </p>
+              )}
+            </div>
+
+            {/* Info Message */}
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <strong>Note:</strong> Make sure the Excel columns match the field names
+                above. You can select which Excel column maps to each field.
+              </p>
+            </div>
+
+            {/* Footer Buttons */}
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setIsImportModalOpen(false);
+                  setImportedData([]);
+                  setColumnMapping({});
+                  const fileInput = document.getElementById("excel-import-input");
+                  if (fileInput) fileInput.value = "";
+                }}
+                className="px-6 py-2 border rounded bg-gray-500 text-white hover:bg-gray-600 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleImportSubmit}
+                disabled={Object.values(columnMapping).every((val) => !val)}
+                className={`px-6 py-2 rounded text-white cursor-pointer ${Object.values(columnMapping).every((val) => !val)
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-teal-600 hover:bg-teal-700"
+                  }`}
+              >
+                Import Data
               </button>
             </div>
           </div>

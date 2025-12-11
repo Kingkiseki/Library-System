@@ -15,7 +15,7 @@ const Notifications = () => {
         // Get recent students (created today)
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
+
         const recentStudents = res.data
           .filter(student => {
             const createdDate = new Date(student.createdAt);
@@ -50,7 +50,7 @@ const Notifications = () => {
 
   return (
     <div
-      className="bg-teal-700 text-white p-0 w-full"
+      className="bg-teal-700 text-white p-0 w-full rounded-xl"
       style={{
         boxShadow: "8px 8px 20px rgba(0,0,0,0.4)", // 3D shadow on right & bottom
       }}
@@ -59,10 +59,10 @@ const Notifications = () => {
       <h2 className="text-2xl font-sans m-3">New Registrant</h2>
 
       {/* Tabs */}
-      
+
       <div className="flex space-x-4 border-b p-2 border-white mb-3">
-    
-      </div> 
+
+      </div>
 
       {/* Notifications List */}
       <div className="space-y-3">
@@ -72,11 +72,10 @@ const Notifications = () => {
             className="flex justify-between items-center border-b border-white pb-2 m-3"
           >
             <p
-              className={`text-sm ${
-                note.text.includes("")
-                  ? "text-white font-medium"
-                  : "font-medium"
-              }`}
+              className={`text-sm ${note.text.includes("")
+                ? "text-white font-medium"
+                : "font-medium"
+                }`}
             >
               {note.text}
             </p>

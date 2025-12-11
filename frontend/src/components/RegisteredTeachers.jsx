@@ -17,18 +17,15 @@ const RegisteredTeachers = () => {
 
     const qrRef = useRef(null);
 
-    // Generate unique random ID
     const generateTeacherID = () => {
         return `TCH-${Math.floor(10000 + Math.random() * 90000)}`;
     };
 
-    // Handle form change
     const handleChange = (e) => {
         const { name, value } = e.target;
         setTeacherData({ ...teacherData, [name]: value });
     };
 
-    // Handle add teacher
     const handleAddTeacher = (e) => {
         e.preventDefault();
         if (!teacherData.name) return;

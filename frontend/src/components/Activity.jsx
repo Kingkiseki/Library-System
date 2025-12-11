@@ -10,7 +10,7 @@ const Activity = () => {
 
   return (
     <div
-      className="bg-teal-700 text-white shadow-lg w-full h-61 flex flex-col"
+      className="bg-teal-700 text-white shadow-lg w-full h-61 flex flex-col rounded-xl"
       style={{
         boxShadow: "8px 8px 20px rgba(0,0,0,0.4)", // 3D shadow on right & bottom
       }}
@@ -38,10 +38,10 @@ const Activity = () => {
               </div>
               <div className="text-xs opacity-90 mt-1">
                 Book: {
-                  activity.inventoryItemData?.booktitle || 
+                  activity.inventoryItemData?.booktitle ||
                   activity.inventoryItemData?.["Book Title"] ||
-                  activity.book?.name || 
-                  activity.book?.title || 
+                  activity.book?.name ||
+                  activity.book?.title ||
                   'Unknown Book'
                 }
               </div>
