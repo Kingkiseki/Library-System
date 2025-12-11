@@ -30,7 +30,7 @@ const BookShelf = () => {
     status: "Available",
   });
   const [search, setSearch] = useState("");
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+  // sorting removed: columns will no longer be clickable for sorting
   const [selectedBooks, setSelectedBooks] = useState([]);
   const [deleteMode, setDeleteMode] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -726,25 +726,7 @@ const BookShelf = () => {
     }
   };
 
-  // ✅ Sorting
-  const handleSort = (key) => {
-    let direction = "asc";
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
-
-    const currentData = inventoryData[activeCategory] || [];
-    const sortedData = [...currentData].sort((a, b) => {
-      if (a[key] < b[key]) return direction === "asc" ? -1 : 1;
-      if (a[key] > b[key]) return direction === "asc" ? 1 : -1;
-      return 0;
-    });
-    setInventoryData(prev => ({
-      ...prev,
-      [activeCategory]: sortedData
-    }));
-  };
+  // sorting removed: columns are static now
 
   // Get current data based on active category
   const getCurrentData = () => {
@@ -893,15 +875,9 @@ const BookShelf = () => {
                 {getCurrentConfig().fields.map((field) => (
                   <th
                     key={field.key}
-                    onClick={() => handleSort(field.key)}
-                    className="px-2 sm:px-4 py-2 border cursor-pointer hover:bg-gray-200"
+                    className="px-2 sm:px-4 py-2 border text-center"
                   >
-                    {field.label}{" "}
-                    {sortConfig.key === field.key
-                      ? sortConfig.direction === "asc"
-                        ? "▲"
-                        : "▼"
-                      : ""}
+                    {field.label}
                   </th>
                 ))}
                 <th className="px-2 sm:px-4 py-2 border">Actions</th>
@@ -935,22 +911,61 @@ const BookShelf = () => {
                         />
                       </td>
                     )}
-                    {getCurrentConfig().fields.map((field) => (
-                      <td key={field.key} className="px-2 sm:px-4 py-2 border">
-                        {field.type === "url" ? (
-                          <a
-                            href={item[field.key]}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline"
-                          >
-                            {item[field.key] ? "Access Link" : "N/A"}
-                          </a>
-                        ) : (
-                          item[field.key] || "N/A"
-                        )}
-                      </td>
-                    ))}
+                    {getCurrentConfig().fields.map((field) => {
+                      // Provide a sequential index for display (based on filteredBooks order)
+                      const displayIndex = idx + 1;
+
+                      // Normalize the field key for checks
+                      const normalizedKey = (field.key || "").toLowerCase();
+
+                      // If the field is a URL type, keep the original link behaviour
+                      if (field.type === "url") {
+                        return (
+                          <td key={field.key} className="px-2 sm:px-4 py-2 border">
+                            <a
+                              href={item[field.key]}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline"
+                            >
+                              {item[field.key] ? "Access Link" : "N/A"}
+                            </a>
+                          </td>
+                        );
+                      }
+
+                      // Render sequential numbering for 'No' column
+                      if (normalizedKey === "no") {
+                        return (
+                          <td key={field.key} className="px-2 sm:px-4 py-2 border">
+                            {displayIndex}
+                          </td>
+                        );
+                      }
+
+                      // Make 'Accession Number' clickable (shows QR) and also display sequential number
+                      if (normalizedKey === "accession number" || normalizedKey.includes("accession")) {
+                        const displayValue = item[field.key] || displayIndex;
+                        return (
+                          <td key={field.key} className="px-2 sm:px-4 py-2 border">
+                            <button
+                              onClick={() => handleShowQRCode(item)}
+                              className="hover:underline"
+                              title="Show QR / Details"
+                            >
+                              {displayValue}
+                            </button>
+                          </td>
+                        );
+                      }
+
+                      // Default rendering for other fields
+                      return (
+                        <td key={field.key} className="px-2 sm:px-4 py-2 border">
+                          {item[field.key] !== undefined && item[field.key] !== null && item[field.key] !== "" ? item[field.key] : "N/A"}
+                        </td>
+                      );
+                    })}
                     <td className="px-2 sm:px-4 py-2 border">
                       <div className="flex justify-center gap-2">
                         <button
